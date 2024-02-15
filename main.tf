@@ -18,10 +18,12 @@ provider "proxmox" {
 resource "proxmox_lxc" "rundeck" {
     target_node = "projectlemon"
     hostname = "rundeck"
-    ostemplate = "local:vztmpl/ubuntu-22.04-standard_22.04-1_amd64.tar.zst"
+    ostemplate = "${var.ubuntu_template}"
     password = "${var.base_password}"
-    tags = "Infra,IaC"
+    ssh_public_keys = "${var.ssh_keys}"
+    tags = "iac;infra"
     start = true
+    memory = 2024
 
     rootfs {
         storage = "Cadbury"
