@@ -15,15 +15,38 @@ provider "proxmox" {
 }
 
 # Setup LXC
-resource "proxmox_lxc" "rundeck" {
-    target_node = "projectlemon"
-    hostname = "rundeck"
+resource "proxmox_lxc" "nextcloud" {
+    target_node = "projectlemon" 
+    hostname = "data"
     ostemplate = "${var.ubuntu_template}"
     password = "${var.base_password}"
     ssh_public_keys = "${var.ssh_keys}"
-    tags = "iac;infra"
+    tags = "iac,infra"
     start = true
-    memory = 2024
+    memory = 4096
+
+    rootfs {
+        storage = "Cadbury"
+        size    = "50G"
+    }    
+
+    network {
+        name = "eth0"
+        bridge = "vmbr08"
+        ip = "192.168.18.100/24"
+    }
+}
+
+resource "proxmox_lxc" "rundeck-test" {
+  count = 0
+    target_node = "projectlemon"
+    hostname = "test-rundeck-${count.index}"
+    ostemplate = "${var.ubuntu_template}"
+    password = "${var.base_password}"
+    ssh_public_keys = "${var.ssh_keys}"
+    tags = "iac"
+    start = true
+    memory = 1024
 
     rootfs {
         storage = "Cadbury"
