@@ -24,6 +24,7 @@ resource "proxmox_lxc" "nextcloud" {
     tags = "iac,infra"
     start = true
     memory = 4096
+    privileged = true
 
     rootfs {
         storage = "Cadbury"
@@ -34,6 +35,7 @@ resource "proxmox_lxc" "nextcloud" {
         name = "eth0"
         bridge = "vmbr08"
         ip = "192.168.18.100/24"
+        gateway = "192.168.18.1"
     }
 }
 
