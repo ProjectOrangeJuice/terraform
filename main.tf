@@ -14,30 +14,50 @@ provider "proxmox" {
   pm_tls_insecure = true
 }
 
-# Setup LXC
-resource "proxmox_lxc" "nextcloud" {
-    target_node = "projectlemon" 
-    hostname = "data"
-    ostemplate = "${var.ubuntu_template}"
-    password = "${var.base_password}"
-    ssh_public_keys = "${var.ssh_keys}"
-    tags = "iac,infra"
-    start = true
-    memory = 4096
-    privileged = true
+resource "proxmox_vm_qemu" "nextcloud" {
+  name        = "data"
+  desc        = "nextcloud"
+  target_node = "projectlemon"
+  tags = "iac;infra"
+  agent = 1
+  scsihw = "virtio-scsi-pci"
+  bootdisk = "scsi0"
+  qemu_os = "l26"
 
-    rootfs {
+  clone = "VM 9000"
+  cloudinit_cdrom_storage = "Cadbury"
+
+  cores   = 4
+  sockets = 1
+  memory  = 6096
+  balloon = 1024
+
+  disks {
+    scsi {
+      scsi0 {
+        disk {
+        size    = 30
         storage = "Cadbury"
-        size    = "50G"
-    }    
-
-    network {
-        name = "eth0"
-        bridge = "vmbr08"
-        ip = "192.168.18.100/24"
-        gateway = "192.168.18.1"
+        }
+      }
     }
+  }
+
+  network {
+    model = "virtio"
+    bridge = "vmbr08"
 }
+
+
+  os_type   = "cloud-init"
+  ipconfig0 = "ip=192.168.18.106/24,gw=192.168.18.1"
+
+  sshkeys = "${var.ssh_keys}"
+
+  ciuser = "root"
+  cipassword =  "${var.base_password}"
+}
+
 
 resource "proxmox_lxc" "rundeck-test" {
   count = 0
