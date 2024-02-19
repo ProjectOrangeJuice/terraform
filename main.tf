@@ -111,7 +111,7 @@ resource "proxmox_vm_qemu" "ansible-controller" {
   }
 
   os_type   = "cloud-init"
-  ipconfig0 = "ip=192.168.18.101/24,gw=192.168.18.1"
+  ipconfig0 = "ip=dhcp"
 
   sshkeys = var.ssh_keys
 
