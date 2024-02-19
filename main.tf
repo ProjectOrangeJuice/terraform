@@ -19,7 +19,7 @@ resource "proxmox_vm_qemu" "nextcloud" {
   desc        = "nextcloud"
   target_node = "projectlemon"
   tags        = "iac;infra"
-  agent       = 1
+  agent       = 0
   scsihw      = "virtio-scsi-pci"
   bootdisk    = "scsi0"
   qemu_os     = "l26"
@@ -53,6 +53,7 @@ resource "proxmox_vm_qemu" "nextcloud" {
       target_node,
       vm_state,
       bootdisk,
+      agent,
      ]
   }
 
@@ -66,3 +67,54 @@ resource "proxmox_vm_qemu" "nextcloud" {
 }
 
 
+resource "proxmox_vm_qemu" "ansible-controller" {
+  name        = "ansible-controller"
+  desc        = "Semaphore (ansible UI)"
+  target_node = "projectlemon"
+  tags        = "iac;infra"
+  agent       = 0
+  scsihw      = "virtio-scsi-pci"
+  bootdisk    = "scsi0"
+  qemu_os     = "l26"
+
+  clone                   = "VM 9000"
+  cloudinit_cdrom_storage = "Cadbury"
+
+  cores   = 4
+  sockets = 1
+  memory  = 2096
+  balloon = 512
+
+  disks {
+    scsi {
+      scsi0 {
+        disk {
+          size    = 8
+          storage = "Cadbury"
+        }
+      }
+    }
+  }
+
+  network {
+    model  = "virtio"
+    bridge = "vmbr08"
+  }
+
+  lifecycle {
+    ignore_changes = [ 
+      target_node,
+      vm_state,
+      bootdisk,
+      agent,
+     ]
+  }
+
+  os_type   = "cloud-init"
+  ipconfig0 = "ip=192.168.18.101/24,gw=192.168.18.1"
+
+  sshkeys = var.ssh_keys
+
+  ciuser     = "root"
+  cipassword = var.base_password
+}
