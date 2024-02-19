@@ -24,7 +24,7 @@ resource "proxmox_vm_qemu" "nextcloud" {
   bootdisk    = "scsi0"
   qemu_os     = "l26"
 
-  clone                   = "VM 9000"
+  clone                   = "${var.ubuntu_template}"
   cloudinit_cdrom_storage = "Cadbury"
 
   cores   = 4
@@ -54,6 +54,7 @@ resource "proxmox_vm_qemu" "nextcloud" {
       vm_state,
       bootdisk,
       agent,
+      clone,
      ]
   }
 
@@ -64,6 +65,7 @@ resource "proxmox_vm_qemu" "nextcloud" {
 
   ciuser     = "root"
   cipassword = var.base_password
+  
 }
 
 
@@ -77,7 +79,7 @@ resource "proxmox_vm_qemu" "ansible-controller" {
   bootdisk    = "scsi0"
   qemu_os     = "l26"
 
-  clone                   = "VM 9000"
+  clone                   = "${var.ubuntu_template}"
   cloudinit_cdrom_storage = "Cadbury"
 
   cores   = 4
@@ -105,6 +107,7 @@ resource "proxmox_vm_qemu" "ansible-controller" {
     ignore_changes = [ 
       target_node,
       vm_state,
+      clone,
       bootdisk,
       agent,
      ]
