@@ -1,30 +1,30 @@
 terraform {
   required_providers {
     proxmox = {
-      source = "telmate/proxmox"
+      source  = "telmate/proxmox"
       version = "3.0.1-rc1"
     }
   }
 }
 
 provider "proxmox" {
-  pm_api_url = "https://192.168.10.10:8006/api2/json"
-  pm_api_token_id = "${var.proxmox_token}"
-  pm_api_token_secret = "${var.proxmox_secret}"
-  pm_tls_insecure = true
+  pm_api_url          = "https://192.168.10.10:8006/api2/json"
+  pm_api_token_id     = var.proxmox_token
+  pm_api_token_secret = var.proxmox_secret
+  pm_tls_insecure     = true
 }
 
 resource "proxmox_vm_qemu" "nextcloud" {
   name        = "data"
   desc        = "nextcloud"
   target_node = "projectlemon"
-  tags = "iac;infra"
-  agent = 1
-  scsihw = "virtio-scsi-pci"
-  bootdisk = "scsi0"
-  qemu_os = "l26"
+  tags        = "iac;infra"
+  agent       = 1
+  scsihw      = "virtio-scsi-pci"
+  bootdisk    = "scsi0"
+  qemu_os     = "l26"
 
-  clone = "VM 9000"
+  clone                   = "VM 9000"
   cloudinit_cdrom_storage = "Cadbury"
 
   cores   = 4
@@ -36,48 +36,33 @@ resource "proxmox_vm_qemu" "nextcloud" {
     scsi {
       scsi0 {
         disk {
-        size    = 30
-        storage = "Cadbury"
+          size    = 60
+          storage = "Cadbury"
         }
       }
     }
   }
 
   network {
-    model = "virtio"
+    model  = "virtio"
     bridge = "vmbr08"
-}
+  }
 
+  lifecycle {
+    ignore_changes = [ 
+      target_node,
+      vm_state,
+      bootdisk,
+     ]
+  }
 
   os_type   = "cloud-init"
   ipconfig0 = "ip=192.168.18.106/24,gw=192.168.18.1"
 
-  sshkeys = "${var.ssh_keys}"
+  sshkeys = var.ssh_keys
 
-  ciuser = "root"
-  cipassword =  "${var.base_password}"
+  ciuser     = "root"
+  cipassword = var.base_password
 }
 
 
-resource "proxmox_lxc" "rundeck-test" {
-  count = 0
-    target_node = "projectlemon"
-    hostname = "test-rundeck-${count.index}"
-    ostemplate = "${var.ubuntu_template}"
-    password = "${var.base_password}"
-    ssh_public_keys = "${var.ssh_keys}"
-    tags = "iac"
-    start = true
-    memory = 1024
-
-    rootfs {
-        storage = "Cadbury"
-        size    = "8G"
-    }    
-
-    network {
-        name = "eth0"
-        bridge = "vmbr08"
-        ip = "dhcp"
-    }
-}
