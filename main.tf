@@ -69,9 +69,10 @@ resource "proxmox_vm_qemu" "nextcloud" {
 }
 
 
-resource "proxmox_vm_qemu" "ansible-controller" {
-  name        = "ansible-controller"
-  desc        = "Semaphore (ansible UI)"
+
+resource "proxmox_vm_qemu" "wazuh" {
+  name        = "wazuh"
+  desc        = "wazuh all in one"
   target_node = "projectlemon"
   tags        = "iac;infra"
   agent       = 0
@@ -84,14 +85,14 @@ resource "proxmox_vm_qemu" "ansible-controller" {
 
   cores   = 4
   sockets = 1
-  memory  = 2096
-  balloon = 512
+  memory  = 6096
+  balloon = 1024
 
   disks {
     scsi {
       scsi0 {
         disk {
-          size    = 8
+          size    = 12
           storage = "Cadbury"
         }
       }
@@ -107,9 +108,9 @@ resource "proxmox_vm_qemu" "ansible-controller" {
     ignore_changes = [ 
       target_node,
       vm_state,
-      clone,
       bootdisk,
       agent,
+      clone,
      ]
   }
 
@@ -120,6 +121,41 @@ resource "proxmox_vm_qemu" "ansible-controller" {
 
   ciuser     = "root"
   cipassword = var.base_password
+  
+}
+
+
+resource "proxmox_lxc" "controller" {
+    count = 1
+    target_node = "projectlemon"
+    description = "Ansible"
+    hostname = "controller"
+    ostemplate = "${var.ubuntu_container_template}"
+    password = "${var.base_password}"
+    ssh_public_keys = "${var.ssh_keys}"
+    tags = "iac,infra"
+    start = false
+    memory = 1024
+
+    rootfs {
+        storage = "Cadbury"
+        size    = "8G"
+    }    
+
+    network {
+        name = "eth0"
+        bridge = "vmbr08"
+        ip = "dhcp"
+    }
+
+    lifecycle {
+    ignore_changes = [ 
+      target_node,
+      start,
+      tags,
+     ]
+  }
+
 }
 
 
@@ -143,14 +179,13 @@ resource "proxmox_lxc" "nginx" {
     network {
         name = "eth0"
         bridge = "vmbr08"
-        ip = "192.168.18.11${count.index}/24,gw=192.168.18.1"
+        ip = "dhcp"
     }
 
     lifecycle {
     ignore_changes = [ 
       target_node,
       start,
-      network,
       tags,
      ]
   }
