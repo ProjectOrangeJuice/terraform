@@ -153,6 +153,8 @@ resource "proxmox_lxc" "controller" {
       target_node,
       start,
       tags,
+      ssh_public_keys,
+      description,
      ]
   }
 
@@ -160,7 +162,7 @@ resource "proxmox_lxc" "controller" {
 
 
 resource "proxmox_lxc" "nginx" {
-    count = 2
+    count = 0
     target_node = "projectlemon"
     description = count.index == 0 ? "Public nginx" : "Private nginx"
     hostname = "nginx-${count.index}"
@@ -187,6 +189,8 @@ resource "proxmox_lxc" "nginx" {
       target_node,
       start,
       tags,
+      ssh_public_keys,
+      description,
      ]
   }
 
