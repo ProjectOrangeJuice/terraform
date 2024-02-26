@@ -121,3 +121,38 @@ resource "proxmox_vm_qemu" "ansible-controller" {
   ciuser     = "root"
   cipassword = var.base_password
 }
+
+
+resource "proxmox_lxc" "nginx" {
+    count = 2
+    target_node = "projectlemon"
+    description = count.index == 0 ? "Public nginx" : "Private nginx"
+    hostname = "nginx-${count.index}"
+    ostemplate = "${var.ubuntu_container_template}"
+    password = "${var.base_password}"
+    ssh_public_keys = "${var.ssh_keys}"
+    tags = "iac,infra"
+    start = false
+    memory = 1024
+
+    rootfs {
+        storage = "Cadbury"
+        size    = "8G"
+    }    
+
+    network {
+        name = "eth0"
+        bridge = "vmbr08"
+        ip = "192.168.18.11${count.index}/24,gw=192.168.18.1"
+    }
+
+    lifecycle {
+    ignore_changes = [ 
+      target_node,
+      start,
+      network,
+      tags,
+     ]
+  }
+
+}
