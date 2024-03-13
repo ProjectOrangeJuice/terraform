@@ -162,7 +162,7 @@ resource "proxmox_lxc" "controller" {
 
 
 resource "proxmox_lxc" "nginx" {
-    count = 0
+    count = 2
     target_node = "projectlemon"
     description = count.index == 0 ? "Public nginx" : "Private nginx"
     hostname = "nginx-${count.index}"
