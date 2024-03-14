@@ -29,14 +29,14 @@ resource "proxmox_vm_qemu" "nextcloud" {
 
   cores   = 4
   sockets = 1
-  memory  = 6096
+  memory  = 8096
   balloon = 1024
 
   disks {
     scsi {
       scsi0 {
         disk {
-          size    = 60
+          size    = 250
           storage = "Cadbury"
         }
       }
