@@ -38,6 +38,7 @@ resource "proxmox_vm_qemu" "nextcloud" {
         disk {
           size    = 250
           storage = "Cadbury"
+          replicate = true
         }
       }
     }
@@ -166,6 +167,42 @@ resource "proxmox_lxc" "nginx" {
     target_node = "projectlemon"
     description = count.index == 0 ? "Public nginx" : "Private nginx"
     hostname = "nginx-${count.index}"
+    ostemplate = "${var.ubuntu_container_template}"
+    password = "${var.base_password}"
+    ssh_public_keys = "${var.ssh_keys}"
+    tags = "iac,infra"
+    start = false
+    memory = 1024
+
+    rootfs {
+        storage = "Cadbury"
+        size    = "8G"
+    }    
+
+    network {
+        name = "eth0"
+        bridge = "vmbr08"
+        ip = "dhcp"
+    }
+
+    lifecycle {
+    ignore_changes = [ 
+      target_node,
+      start,
+      tags,
+      ssh_public_keys,
+      description,
+     ]
+  }
+
+}
+
+
+resource "proxmox_lxc" "gateway" {
+    count = 1
+    target_node = "projectlemon"
+    description = "Gateway for reverse proxy"
+    hostname = "gateway"
     ostemplate = "${var.ubuntu_container_template}"
     password = "${var.base_password}"
     ssh_public_keys = "${var.ssh_keys}"
