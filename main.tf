@@ -137,6 +137,7 @@ resource "proxmox_lxc" "controller" {
     tags = "iac,infra"
     start = false
     memory = 1024
+    unprivileged = true
 
     rootfs {
         storage = "Cadbury"
@@ -173,6 +174,7 @@ resource "proxmox_lxc" "nginx" {
     tags = "iac,infra"
     start = false
     memory = 1024
+    unprivileged = true
 
     rootfs {
         storage = "Cadbury"
@@ -209,6 +211,7 @@ resource "proxmox_lxc" "gateway" {
     tags = "iac,infra"
     start = false
     memory = 1024
+    unprivileged = true
 
     rootfs {
         storage = "Cadbury"
@@ -245,6 +248,7 @@ resource "proxmox_lxc" "vault" {
     tags = "iac,infra"
     start = false
     memory = 1024
+    unprivileged = true
 
     features {
         nesting = true
