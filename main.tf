@@ -232,3 +232,43 @@ resource "proxmox_lxc" "gateway" {
   }
 
 }
+
+
+resource "proxmox_lxc" "vault" {
+    count = 1
+    target_node = "projectlemon"
+    description = "Bitwarden"
+    hostname = "vault"
+    ostemplate = "${var.ubuntu_container_template}"
+    password = "${var.base_password}"
+    ssh_public_keys = "${var.ssh_keys}"
+    tags = "iac,infra"
+    start = false
+    memory = 1024
+
+    features {
+        nesting = true
+    }
+
+    rootfs {
+        storage = "Cadbury"
+        size    = "8G"
+    }    
+
+    network {
+        name = "eth0"
+        bridge = "vmbr08"
+        ip = "dhcp"
+    }
+
+    lifecycle {
+    ignore_changes = [ 
+      target_node,
+      start,
+      tags,
+      ssh_public_keys,
+      description,
+     ]
+  }
+
+}
