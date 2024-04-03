@@ -237,11 +237,11 @@ resource "proxmox_lxc" "gateway" {
 }
 
 
-resource "proxmox_lxc" "vault" {
+resource "proxmox_lxc" "passwordStore" {
     count = 1
     target_node = "projectlemon"
     description = "Bitwarden"
-    hostname = "vault"
+    hostname = "passwordStore"
     ostemplate = "${var.ubuntu_container_template}"
     password = "${var.base_password}"
     ssh_public_keys = "${var.ssh_keys}"
